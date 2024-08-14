@@ -4,7 +4,7 @@ public interface ICardDriver
 {
     Task<CardData?> ReadCard(CancellationToken cancellationToken);
     
-    IAsyncEnumerable<EjectResult> EjectCard(CancellationToken cancellationToken);
+    IAsyncEnumerable<EjectResult> EjectCard(TimeSpan takeCardTimeout, CancellationToken cancellationToken);
 }
 
 public interface ICardDriverMock : ICardDriver
@@ -12,13 +12,15 @@ public interface ICardDriverMock : ICardDriver
     void SetCardData(CardData cardData);
     void CantReadCard();
     void TakeCard();
+    void TriggerCardReaderError();    
 }
 
 public enum EjectResult
 {
     Ejected,
     CardTaken,
-    Retracted
+    Retracted,
+    CardReaderError
 }
 
 public record CardData(string CardNumber);

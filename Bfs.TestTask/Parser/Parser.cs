@@ -12,6 +12,11 @@ public class Parser : IParser
 
         throw new NotImplementedException();
     }
+
+    public IMessage Parse(ReadOnlyMemory<byte> message)
+    {
+        throw new NotImplementedException();
+    }
 }
 
  /*

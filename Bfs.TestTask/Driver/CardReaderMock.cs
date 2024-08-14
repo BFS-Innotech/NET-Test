@@ -1,5 +1,3 @@
-using System.Runtime.CompilerServices;
-
 namespace Bfs.TestTask.Driver;
 
 public class CardDriverMock : ICardDriverMock
@@ -9,11 +7,11 @@ public class CardDriverMock : ICardDriverMock
       throw new NotImplementedException();
     }
 
-    public IAsyncEnumerable<EjectResult> EjectCard(CancellationToken cancellationToken)
+    public IAsyncEnumerable<EjectResult> EjectCard(TimeSpan takeCardTimeout, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
-
+    
     public void SetCardData(CardData cardData)
     {
         throw new NotImplementedException();
@@ -25,6 +23,11 @@ public class CardDriverMock : ICardDriverMock
     }
 
     public void TakeCard()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void TriggerCardReaderError()
     {
         throw new NotImplementedException();
     }

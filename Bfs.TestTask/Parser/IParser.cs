@@ -4,7 +4,11 @@ namespace Bfs.TestTask.Parser;
 
 public interface IParser
 {
+    //Распарсить набор сообщений из канала
     IAsyncEnumerable<IMessage> Parse(ChannelReader<ReadOnlyMemory<byte>> source);
+    
+    //Распарсить одно сообщение
+    IMessage Parse(ReadOnlyMemory<byte> message);
 }
 
 public interface IMessage
@@ -30,6 +34,6 @@ public record GetFitnessData(
     char MessageIdentifier,
     char HardwareFitnessIdentifier,
     FitnessState[] FitnessStates
-    ) : IMessage;
+) : IMessage;
 
 public record FitnessState(char DIG, string Fitness);

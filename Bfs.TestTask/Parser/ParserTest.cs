@@ -1,7 +1,18 @@
+using System.Diagnostics;
+using System.Text;
+using Xunit.Abstractions;
+
 namespace Bfs.TestTask.Parser;
 
 public class ParserTest
 {
+    private readonly ITestOutputHelper _testOutputHelper;
+
+    public ParserTest(ITestOutputHelper testOutputHelper)
+    {
+        _testOutputHelper = testOutputHelper;
+    }
+
     [Fact]
     public async Task ParseMessages()
     {
@@ -18,14 +29,23 @@ public class ParserTest
             new('w', "00040003000200010"),
             new('H', "0")
         });
-        
+
+        var otherFitnessData = new GetFitnessData("355", 'F', 'J', 'A', new FitnessState[]
+        {
+            new('D', "01"),
+            new('y', "1"),
+            new('A', "0"),
+            new('w', "0004000310"),
+            new('H', "0")
+        });
+
         var source = new MessageSource();
 
         var channel = source.Reader;
 
         var parser = new Parser();
 
-        source.StartConsume();
+        _ = source.StartConsume();
 
         int index = 0;
 
@@ -43,13 +63,71 @@ public class ParserTest
             }
             else if (message is GetFitnessData getFitnessDataMessage)
             {
-                Assert.Equal(2, index);
-                Assert.Equivalent(getFitnessData, getFitnessDataMessage, true);
+                if (index == 2)
+                {
+                    Assert.Equivalent(getFitnessData, getFitnessDataMessage, true);
+                }
+                else if (index == 3)
+                {
+                    Assert.Equivalent(otherFitnessData, getFitnessDataMessage, true);
+                }
+                else
+                {
+                    Assert.Fail();
+                }
             }
 
             index++;
         }
 
-        Assert.Equal(3, index);
+        Assert.Equal(4, index);
+    }
+
+    [Fact]
+    public void StressTest()
+    {
+        var parser = new Parser();
+
+        var sendStatus = @"2200100355B";
+
+        byte[][] read = new byte[10_000_000][];
+        for (int i = 0; i < read.Length; i++)
+        {
+            read[i] = Encoding.ASCII.GetBytes(sendStatus + i);
+        }
+
+        Stopwatch stopwatch = new Stopwatch();
+        var startAllocatedBytes = GC.GetTotalAllocatedBytes(true);
+        stopwatch.Start();
+
+        IMessage message = null!;
+
+        for (int i = 0; i < read.Length; i++)
+        {
+            message = parser.Parse(read[i]);
+        }
+
+        Assert.Equal(((SendStatus)message).TransactionNumber, read.Length - 1);
+
+        stopwatch.Stop();
+        var stopAllocatedBytes = GC.GetTotalAllocatedBytes(true);
+        var totalAllocatedBytes = stopAllocatedBytes - startAllocatedBytes;
+
+        _testOutputHelper.WriteLine($"Total allocated bytes: {totalAllocatedBytes}");
+        _testOutputHelper.WriteLine($"Total allocated MBytes: {totalAllocatedBytes / 1024 / 1024}");
+
+        _testOutputHelper.WriteLine(
+            $"Best allocations result bytes: {32 * (long)10_000_000}"); // На ARM64 объект занимает 32 байта
+
+        _testOutputHelper.WriteLine(
+            $"Best allocations result MBytes: {32 * (long)10_000_000 / 1024 / 1024}");
+
+        _testOutputHelper.WriteLine($"Total time: {stopwatch.ElapsedMilliseconds}");
+
+        // Total allocated bytes: 320078880
+        // Total allocated MBytes: 305
+        // Best allocations result bytes: 320000000
+        // Best allocations result MBytes: 305
+        // Total time: 1863
     }
 }

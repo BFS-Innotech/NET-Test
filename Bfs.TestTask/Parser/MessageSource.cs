@@ -19,6 +19,7 @@ public class MessageSource
         var cardReaderState = @"1200100355D1001";
         var sendStatus = @"2200100355B4321";
         var fitnessData = @"2200100355FJAD01y1A0E00000G0L0w00040003000200010H0";
+        var otherFitnessData = @"22355FJAD01y1A0w0004000310H0";
 
         await WriteMessage(cardReaderState);
         await Task.Delay(100);
@@ -26,6 +27,9 @@ public class MessageSource
         await Task.Delay(100);
         await WriteMessage(fitnessData);
         await Task.Delay(100);
+        await WriteMessage(otherFitnessData);
+        await Task.Delay(100);
+
         _channel.Writer.Complete();
     }
 
