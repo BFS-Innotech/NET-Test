@@ -2,7 +2,7 @@ namespace Bfs.TestTask.Driver;
 
 public class CardDriverMock : ICardDriverMock
 {
-    public async Task<CardData?> ReadCard(CancellationToken cancellationToken)
+    public Task<CardData?> ReadCard(CancellationToken cancellationToken)
     {
       throw new NotImplementedException();
     }
